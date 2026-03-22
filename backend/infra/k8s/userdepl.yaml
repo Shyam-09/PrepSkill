@@ -1,0 +1,94 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: user-depl
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: user
+  template:
+    metadata:
+      labels:
+        app: user
+    spec:
+      initContainers:
+        - name: wait-for-postgres
+          image: busybox
+          command: ['sh', '-c', 'until nc -z user-postgres-srv 5432; do echo waiting for postgres; sleep 2; done']
+      containers:
+        - name: user
+          image: shyambadireddy/user-service
+          imagePullPolicy: IfNotPresent
+          ports:
+            - containerPort: 5001
+          env:
+            - name: PORT
+              value: "5001"
+            - name: DATABASE_URL
+              value: "postgresql://postgres:postgres@user-postgres-srv:5432/userdb?schema=public"
+            - name: REDIS_HOST
+              value: "redis-srv"
+            - name: REDIS_PORT
+              value: "6379"
+            - name: ALLOWED_ORIGINS
+              value: "http://localhost:3000,http://prepskill.com"
+            - name: JWT_SECRET
+              value: "shyam@09(Minato)"
+            - name: JWT_REFRESH_SECRET
+              value: "shyam@09(Minato)refresh"
+            - name: RABBITMQ_URL
+              value: "amqp://rabbitmq-srv"
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: user-srv
+spec:
+  selector:
+    app: user
+  ports:
+    - port: 5001
+      targetPort: 5001
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: user-postgres-depl
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: user-postgres
+  template:
+    metadata:
+      labels:
+        app: user-postgres
+    spec:
+      containers:
+        - name: postgres
+          image: postgres:16-alpine
+          ports:
+            - containerPort: 5432
+          env:
+            - name: POSTGRES_USER
+              value: postgres
+            - name: POSTGRES_PASSWORD
+              value: postgres
+            - name: POSTGRES_DB
+              value: userdb
+          resources:
+            requests:
+              memory: "128Mi"
+              cpu: "100m"
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: user-postgres-srv
+spec:
+  selector:
+    app: user-postgres
+  ports:
+    - port: 5432
+      targetPort: 5432

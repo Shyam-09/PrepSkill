@@ -1,0 +1,58 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum Difficulty {
+  easy
+  medium
+  hard
+}
+
+model UserProgress {
+  id             String         @id @default(uuid())
+  userId         String         @unique
+  totalSolved    Int            @default(0)
+  easySolved     Int            @default(0)
+  mediumSolved   Int            @default(0)
+  hardSolved     Int            @default(0)
+  currentStreak  Int            @default(0)
+  longestStreak  Int            @default(0)
+  lastActiveDate DateTime?
+  createdAt      DateTime       @default(now())
+  updatedAt      DateTime       @updatedAt
+  solvedProblems SolvedProblem[]
+  sheetProgress  SheetProgress[]
+}
+
+model SolvedProblem {
+  id           String       @id @default(uuid())
+  problemId    String
+  sheetId      String
+  topicId      String
+  difficulty   Difficulty
+  notes        String?
+  isRevision   Boolean      @default(false)
+  solvedAt     DateTime     @default(now())
+  progressId   String
+  progress     UserProgress @relation(fields: [progressId], references: [id])
+
+  @@unique([progressId, problemId])
+}
+
+model SheetProgress {
+  id                   String       @id @default(uuid())
+  sheetId              String
+  totalProblems        Int          @default(0) 
+  solvedCount          Int          @default(0)
+  completionPercentage Int          @default(0)
+  lastActivityAt       DateTime     @default(now())
+  progressId           String
+  progress             UserProgress @relation(fields: [progressId], references: [id])
+
+  @@unique([progressId, sheetId])
+}

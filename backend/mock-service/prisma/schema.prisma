@@ -1,0 +1,80 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum Difficulty {
+  easy
+  medium
+  hard
+  mixed
+}
+
+enum AttemptStatus {
+  in_progress
+  completed
+  abandoned
+}
+
+model MockTest {
+  id            String        @id @default(uuid())
+  title         String
+  description   String?
+  category      String
+  totalMarks    Int           @default(0)
+  duration      Int           @default(60)
+  difficulty    Difficulty    @default(mixed)
+  isPremium     Boolean       @default(false)
+  totalAttempts Int           @default(0)
+  createdAt     DateTime      @default(now())
+  updatedAt     DateTime      @updatedAt
+  questions     MockQuestion[]
+  attempts      MockAttempt[]
+}
+
+model MockQuestion {
+  id           String       @id @default(uuid())
+  question     String
+  options      String[]
+  correctAnswer Int
+  explanation  String?
+  difficulty   Difficulty
+  marks        Int          @default(1)
+  order        Int          @default(0)
+  testId       String
+  test         MockTest     @relation(fields: [testId], references: [id], onDelete: Cascade)
+  answers      AnswerDetail[]
+}
+
+model MockAttempt {
+  id               String        @id @default(uuid())
+  userId           String
+  score            Int           @default(0)
+  totalMarks       Int           @default(0)
+  percentage       Float         @default(0)
+  rank             Int?
+  timeTakenSeconds Int           @default(0)
+  status           AttemptStatus @default(in_progress)
+  startedAt        DateTime      @default(now())
+  completedAt      DateTime?
+  createdAt        DateTime      @default(now())
+  updatedAt        DateTime      @updatedAt
+  testId           String
+  test             MockTest      @relation(fields: [testId], references: [id])
+  answers          AnswerDetail[]
+}
+
+model AnswerDetail {
+  id             String      @id @default(uuid())
+  selectedOption Int
+  isCorrect      Boolean
+  marksAwarded   Int         @default(0)
+  attemptId      String
+  questionId     String
+  attempt        MockAttempt  @relation(fields: [attemptId], references: [id], onDelete: Cascade)
+  question       MockQuestion @relation(fields: [questionId], references: [id])
+}

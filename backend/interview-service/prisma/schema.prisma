@@ -1,0 +1,77 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum Difficulty {
+  easy
+  medium
+  hard
+}
+
+enum RoundResult {
+  passed
+  failed
+  pending
+}
+
+enum Outcome {
+  selected
+  rejected
+  in_progress
+}
+
+enum YOE {
+  fresher
+  one_to_three
+  three_to_five
+  five_plus
+}
+
+model InterviewExperience {
+  id                String          @id @default(uuid())
+  userId            String
+  company           String
+  companySlug       String
+  role              String
+  package           String?
+  yoe               YOE
+  outcome           Outcome         @default(in_progress)
+  interviewDate     DateTime
+  overallExperience String
+  tips              String?
+  difficulty        Difficulty
+  upvoteCount       Int             @default(0)
+  isAnonymous       Boolean         @default(false)
+  isApproved        Boolean         @default(true)
+  tags              String[]
+  createdAt         DateTime        @default(now())
+  updatedAt         DateTime        @updatedAt
+  rounds            InterviewRound[]
+  upvotes           InterviewUpvote[]
+}
+
+model InterviewRound {
+  id           String              @id @default(uuid())
+  roundName    String
+  description  String
+  questions    String[]
+  difficulty   Difficulty
+  result       RoundResult         @default(pending)
+  experienceId String
+  experience   InterviewExperience @relation(fields: [experienceId], references: [id], onDelete: Cascade)
+}
+
+model InterviewUpvote {
+  id           String              @id @default(uuid())
+  userId       String
+  experienceId String
+  createdAt    DateTime            @default(now())
+  experience   InterviewExperience @relation(fields: [experienceId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, experienceId])
+}

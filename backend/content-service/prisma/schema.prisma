@@ -1,0 +1,114 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum Difficulty {
+  easy
+  medium
+  hard
+}
+
+enum SheetDifficulty {
+  beginner
+  intermediate
+  advanced
+}
+
+model Category {
+  id          String   @id @default(uuid())
+  name        String   @unique
+  slug        String   @unique
+  description String?
+  icon        String?
+  order       Int      @default(0)
+
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  isDeleted   Boolean  @default(false)
+
+  sheets      Sheet[]
+
+  @@index([order])
+}
+
+model Sheet {
+  id            String          @id @default(uuid())
+  title         String
+  slug          String          @unique
+  description   String?
+  totalProblems Int             @default(0)
+  difficulty    SheetDifficulty @default(intermediate)
+  isPremium     Boolean         @default(false)
+  order         Int             @default(0)
+
+  createdAt     DateTime        @default(now())
+  updatedAt     DateTime        @updatedAt
+  isDeleted     Boolean         @default(false)
+
+  categoryId    String
+  category      Category        @relation(fields: [categoryId], references: [id], onDelete: Cascade)
+
+  topics        Topic[]
+  problems      Problem[]
+
+  @@index([categoryId])
+  @@index([order])
+}
+
+model Topic {
+  id          String    @id @default(uuid())
+  title       String
+  slug        String
+  description String?
+  order       Int       @default(0)
+
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+  isDeleted   Boolean   @default(false)
+
+  sheetId     String
+  sheet       Sheet     @relation(fields: [sheetId], references: [id], onDelete: Cascade)
+
+  problems    Problem[]
+
+  @@unique([slug, sheetId])
+  @@index([sheetId])
+  @@index([order])
+}
+
+model Problem {
+  id          String     @id @default(uuid())
+  title       String
+  slug        String
+  difficulty  Difficulty
+
+  tags        String[]
+
+  leetcodeUrl String?
+  articleUrl  String?
+  videoUrl    String?
+
+  isPremium   Boolean    @default(false)
+  order       Int        @default(0)
+
+  createdAt   DateTime   @default(now())
+  updatedAt   DateTime   @updatedAt
+  isDeleted   Boolean    @default(false)
+
+  topicId     String
+  sheetId     String
+
+  topic       Topic      @relation(fields: [topicId], references: [id], onDelete: Cascade)
+  sheet       Sheet      @relation(fields: [sheetId], references: [id], onDelete: Cascade)
+
+  @@unique([slug, topicId])
+  @@index([sheetId])
+  @@index([topicId])
+  @@index([difficulty])
+  @@index([isPremium])
+}

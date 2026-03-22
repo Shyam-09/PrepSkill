@@ -1,0 +1,32 @@
+{
+  "name": "@prepskill/common",
+  "version": "1.0.19",
+  "description": "Shared utilities, errors and middlewares for PrepSkill microservices",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "files": [
+    "dist"
+  ],
+  "scripts": {
+    "build": "tsc",
+    "pub": "npm version patch && npm run build && npm publish --access public"
+  },
+  "publishConfig": {
+    "access": "public"
+  },
+  "dependencies": {
+    "express": "^5.2.1",
+    "express-rate-limit": "^8.3.1",
+    "helmet": "^8.1.0",
+    "ioredis": "^5.10.0",
+    "joi": "^18.0.2",
+    "jsonwebtoken": "^9.0.3",
+    "winston": "^3.19.0"
+  },
+  "devDependencies": {
+    "@types/express": "^5.0.6",
+    "@types/jsonwebtoken": "^9.0.10",
+    "@types/node": "^25.3.3",
+    "typescript": "^5.9.3"
+  }
+}

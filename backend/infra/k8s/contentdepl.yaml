@@ -1,0 +1,94 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: content-depl
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: content
+  template:
+    metadata:
+      labels:
+        app: content
+    spec:
+      initContainers:
+        - name: wait-for-postgres
+          image: busybox
+          command: ['sh', '-c', 'until nc -z content-postgres-srv 5432; do echo waiting for postgres; sleep 2; done']
+      containers:
+        - name: content
+          image: shyambadireddy/content-service
+          imagePullPolicy: IfNotPresent
+          ports:
+            - containerPort: 5002
+          env:
+            - name: PORT
+              value: "5002"
+            - name: DATABASE_URL
+              value: "postgresql://postgres:postgres@content-postgres-srv:5432/contentdb?schema=public"
+            - name: REDIS_HOST
+              value: "redis-srv"
+            - name: REDIS_PORT
+              value: "6379"
+            - name: ALLOWED_ORIGINS
+              value: "http://localhost:3000,http://prepskill.com"
+            - name: JWT_SECRET
+              value: "shyam@09(Minato)"
+            - name: JWT_REFRESH_SECRET
+              value: "shyam@09(Minato)refresh"
+            - name: RABBITMQ_URL
+              value: "amqp://rabbitmq-srv"
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: content-srv
+spec:
+  selector:
+    app: content
+  ports:
+    - port: 5002
+      targetPort: 5002
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: content-postgres-depl
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: content-postgres
+  template:
+    metadata:
+      labels:
+        app: content-postgres
+    spec:
+      containers:
+        - name: postgres
+          image: postgres:16-alpine
+          ports:
+            - containerPort: 5432
+          env:
+            - name: POSTGRES_USER
+              value: postgres
+            - name: POSTGRES_PASSWORD
+              value: postgres
+            - name: POSTGRES_DB
+              value: contentdb
+          resources:
+            requests:
+              memory: "128Mi"
+              cpu: "100m"
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: content-postgres-srv
+spec:
+  selector:
+    app: content-postgres
+  ports:
+    - port: 5432
+      targetPort: 5432

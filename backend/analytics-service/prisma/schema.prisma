@@ -1,0 +1,45 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model PlatformStats {
+  id                  String   @id @default(uuid())
+  totalUsers          Int      @default(0)
+  totalProblems       Int      @default(0)
+  totalSheets         Int      @default(0)
+  totalSolves         Int      @default(0)
+  totalMockAttempts   Int      @default(0)
+  totalInterviewPosts Int      @default(0)
+  updatedAt           DateTime @updatedAt
+}
+
+model UserAnalytics {
+  id               String          @id @default(uuid())
+  userId           String          @unique
+  totalSolved      Int             @default(0)
+  easySolved       Int             @default(0)
+  mediumSolved     Int             @default(0)
+  hardSolved       Int             @default(0)
+  currentStreak    Int             @default(0)
+  longestStreak    Int             @default(0)
+  mockAttempts     Int             @default(0)
+  averageMockScore Float           @default(0)
+  interviewPosts   Int             @default(0)
+  lastUpdated      DateTime        @updatedAt
+  activityByDay    ActivityByDay[]
+}
+
+model ActivityByDay {
+  id              String        @id @default(uuid())
+  date            String
+  solves          Int           @default(1)
+  userAnalyticsId String
+  analytics       UserAnalytics @relation(fields: [userAnalyticsId], references: [id], onDelete: Cascade)
+
+  @@unique([userAnalyticsId, date])
+}

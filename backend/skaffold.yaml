@@ -1,0 +1,74 @@
+apiVersion: skaffold/v4beta13
+kind: Config
+metadata:
+  name: prepskill
+
+build:
+  local:
+    push: false
+    useDockerCLI: true
+  artifacts:
+    - image: shyambadireddy/user-service
+      context: user-service
+      docker:
+        dockerfile: Dockerfile
+      sync:
+        manual:
+          - src: "src/**/*.ts"
+            dest: .
+    - image: shyambadireddy/content-service
+      context: content-service
+      docker:
+        dockerfile: Dockerfile
+      sync:
+        manual:
+          - src: "src/**/*.ts"
+            dest: .
+    - image: shyambadireddy/progress-service
+      context: progress-service
+      docker:
+        dockerfile: Dockerfile
+      sync:
+        manual:
+          - src: "src/**/*.ts"
+            dest: .
+    - image: shyambadireddy/mock-service
+      context: mock-service
+      docker:
+        dockerfile: Dockerfile
+      sync:
+        manual:
+          - src: "src/**/*.ts"
+            dest: .
+    - image: shyambadireddy/interview-service
+      context: interview-service
+      docker:
+        dockerfile: Dockerfile
+      sync:
+        manual:
+          - src: "src/**/*.ts"
+            dest: .
+    - image: shyambadireddy/analytics-service
+      context: analytics-service
+      docker:
+        dockerfile: Dockerfile
+      sync:
+        manual:
+          - src: "src/**/*.ts"
+            dest: .
+
+manifests:
+  rawYaml:
+    - infra/k8s/redisdepl.yaml
+    - infra/k8s/rabbitmqdepl.yaml
+    - infra/k8s/userdepl.yaml
+    - infra/k8s/contentdepl.yaml
+    - infra/k8s/progressdepl.yaml
+    - infra/k8s/mockdepl.yaml
+    - infra/k8s/interviewdepl.yaml
+    - infra/k8s/analyticsdepl.yaml
+    - infra/k8s/ingress.yaml
+
+deploy:
+  kubeContext: minikube
+  kubectl: {}
