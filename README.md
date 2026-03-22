@@ -74,11 +74,11 @@ prepskill/
 └── skaffold.yaml
 
 
-
+---
 
 ## ⚡ Frontend Setup
 
-
+```bash
 cd frontend
 
 npm install
@@ -91,9 +91,8 @@ npm start        # Run dev server
 npm run build    # Production build
 🔗 API Gateway
 
-All API calls go through:
+All API calls go through
 
-REACT_APP_API_URL/api/*
 Services
 /api/auth
 /api/users
@@ -102,16 +101,11 @@ Services
 /api/mock
 /api/interviews
 /api/analytics
-
-
 🔐 Authentication
 JWT-based authentication
 Axios automatically:
 Attaches access token
 Refreshes expired tokens silently
-
-
-
 📄 Frontend Pages
 Route	Feature	Auth
 /	Landing Page	Public
@@ -126,8 +120,6 @@ Route	Feature	Auth
 /interviews/:id	Experience detail	Optional
 /analytics	Heatmaps, stats	Optional
 /profile	User profile	Required
-
-
 ⚙️ Backend Setup (Per Service)
 cd user-service   # or any service
 
@@ -150,8 +142,6 @@ Redis caching for performance
 Scalable Kubernetes deployment
 Real-time analytics & leaderboards
 Clean reusable common package
-
-
 ☸️ Deployment (Kubernetes)
 # Apply all configs
 kubectl apply -f infra/k8s/
