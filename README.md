@@ -78,21 +78,21 @@ prepskill/
 
 ## ⚡ Frontend Setup
 
-```bash
+
 cd frontend
 
 npm install
 
 cp .env.example .env.local
-# Set:
-# REACT_APP_API_URL=http://your-api-url
+
 
 npm start        # Run dev server
 npm run build    # Production build
 🔗 API Gateway
 
-All API calls go through
+All API calls go through:
 
+REACT_APP_API_URL/api/*
 Services
 /api/auth
 /api/users
